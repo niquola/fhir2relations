@@ -1,24 +1,9 @@
 # Fhir2relations
 
-TODO: Write a gem description
-
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'fhir2relations'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install fhir2relations
-
-## Usage
-
-TODO: Write usage instructions here
+  gem 'fhir2relations'
+  sequel -m db/migrations postgres:///fhir2relations
 
 ## Contributing
 

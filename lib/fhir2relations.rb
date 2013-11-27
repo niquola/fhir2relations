@@ -1,5 +1,6 @@
 require "fhir2relations/version"
 
 module Fhir2relations
-  # Your code goes here...
+  autoload :Loader, 'fhir2relations/loader'
+  autoload :Migrator, 'fhir2relations/migrator'
 end
