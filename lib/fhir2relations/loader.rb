@@ -3,33 +3,29 @@ require 'active_support/core_ext'
 
 module Fhir2relations
   module Loader
+    def _x
+      Fhir2relations::Xml
+    end
+
+    def _db
+      Fhir2relations::Db
+    end
+
+    def load_version(db, version)
+      dt_xml = _x.xml("0.12/fhir-base.xsd")
+      xml = _x.xml("0.12/profiles-resources.xml")
+      self.load(db, version, dt_xml, xml)
+    end
+
     def load(db, version, datatypes_xml, resources_xml)
-      dataset(db, :versions).insert(version: version)
+      _db.dataset(db, :versions).insert(version: version)
 
       fill_datatypes(db, version, datatypes_xml)
-      # fill_resources_table(db, resources_xml)
-    end
-
-    def xml(rel_path)
-      path = from_root_path(rel_path)
-      raise "No such file #{path}" unless File.exists?(path)
-      Nokogiri::XML(open(path).read).tap do |doc|
-        doc.remove_namespaces!
-      end
-    end
-
-    def from_root_path(path)
-      File.dirname(__FILE__) + "/../../vendor/#{path}"
-    end
-
-    def dataset(db, name)
-      (@dataset ||= {})[name.to_sym] ||= db["meta__#{name}".to_sym]
+      fill_resources_table(db, resources_xml)
     end
 
     def fill_datatypes(db, version, xml)
-      datatypes = dataset(db, :datatypes)
-      datatype_enums = dataset(db,:datatype_enums)
-      datatype_elements = dataset(db, :datatype_elements)
+      datatypes = _db.dataset(db, :datatypes)
       (xml.xpath('//simpleType').to_a + xml.xpath('//complexType').to_a).each do |node|
         type = node[:name]
         next unless type
@@ -42,28 +38,37 @@ module Fhir2relations
           restriction_base: node_attr(node, './restriction', :base)
         )
 
-        node.xpath('./restriction/enumeration').each do |enode|
-          datatype_enums.insert(
-            datatype: type,
-            version: version,
-            value: enode[:value],
-            documentation: node_text(enode, './annotation/documentation')
-          )
-        end
+        fill_enums(db, node, type, version)
+        fill_datatype_elements(db, node, type, version)
+      end
+    end
 
-        node.xpath('./complexContent/extension/sequence/element')
-        .each_with_index do |enode, index|
-          datatype_elements.insert(
-            datatype: type,
-            sequence: index,
-            version: version,
-            name: enode[:name] || enode[:ref],
-            type: enode[:type],
-            min_occurs: enode[:minOccurs],
-            max_occurs: enode[:maxOccurs],
-            documentation: node_text(enode, './annotation/documentation')
-          )
-        end
+    def fill_datatype_elements(db, node, type, version)
+      datatype_elements = _db.dataset(db, :datatype_elements)
+      node.xpath('./complexContent/extension/sequence/element')
+      .each_with_index do |enode, index|
+        datatype_elements.insert(
+          datatype: type,
+          sequence: index,
+          version: version,
+          name: enode[:name] || enode[:ref],
+          type: enode[:type],
+          min_occurs: enode[:minOccurs],
+          max_occurs: enode[:maxOccurs],
+          documentation: node_text(enode, './annotation/documentation')
+        )
+      end
+    end
+
+    def fill_enums(db, node, type, version)
+      datatype_enums = _db.dataset(db,:datatype_enums)
+      node.xpath('./restriction/enumeration').each do |enode|
+        datatype_enums.insert(
+          datatype: type,
+          version: version,
+          value: enode[:value],
+          documentation: node_text(enode, './annotation/documentation')
+        )
       end
     end
 
