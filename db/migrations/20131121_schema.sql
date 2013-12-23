@@ -45,7 +45,7 @@ create table meta.resources (
   PRIMARY KEY(type)
 );
 
-create table meta.elements (
+create table meta.resource_elements (
   version varchar,
   path varchar[],
   is_modifier boolean,

@@ -1,16 +1,38 @@
 module Fhir2relations
   module ResourcesRepository
-    def _db
-      Db
+
+    def resources(db, cnd, &block)
+      ress = _db.query_block(_db.dataset(db, :resources).where(cnd), &block)
+      els = _db.dataset(db, :resource_elements)
+      .where(resource:  _db.pluck(ress, :type)).all
+
+      els = coll_to_tree(els)
+      _db.with_children(ress, :type, :elements, els, :resource)
     end
 
-    private :_db
+    def coll_to_tree(coll)
+      coll.select do |e|
+        next false unless e[:path].length == 2
+        collect_elements_recursive(e, coll)
+      end.compact
+    end
 
-    def find_by_name( db, version, name)
-      _db.dataset(db, :resources)
-      .where(version: version)
-      .where(type: name)
-      .first
+    def collect_elements_recursive(parent, coll)
+      parent[:elements] = coll.select do |e|
+        next false unless e[:path][0..-2] == parent[:path]
+        collect_elements_recursive(e, coll)
+      end
+      parent
+    end
+
+    def resource(db, cnd)
+      resources(db, cnd){|rel| rel.limit(1)}.first
+    end
+
+    private
+
+    def _db
+      Db
     end
 
     extend self
