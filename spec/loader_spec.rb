@@ -16,6 +16,7 @@ describe 'Loader' do
   end
 
   before(:all) do
+    next
     subject.migrate!
     subject.load_version('0.12')
   end
@@ -76,7 +77,7 @@ describe 'Loader' do
     end
 
     example do
-      enc = resources_repo.resource(version: '0.12', type: 'Encounter')
+      enc = resources_repo.resource(with_elements: true, version: '0.12', type: 'Encounter')
       print_recurcive(enc)
     end
 

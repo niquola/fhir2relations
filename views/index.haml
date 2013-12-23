@@ -1,0 +1,7 @@
+%h1 Welcome to FHIR
+%ul
+  - @resources.each do |res|
+    %li
+      %a(href="/resources/#{res[:type]}")
+        %h4= res[:type]
+        %p= res[:long]

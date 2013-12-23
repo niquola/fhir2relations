@@ -1,0 +1,17 @@
+%li
+  %details
+    %summary
+      %b= resource_element[:path].last
+      ( #{resource_element[:min]} - #{resource_element[:max]} )
+      - (resource_element[:type] || []).each do |tp|
+        %a(href="/datatypes/#{tp}")= tp
+      = resource_element[:short]
+    %table.table
+      - resource_element.each do |k,v|
+        - next if k == :elements
+        %tr
+          %th= k
+          %td= v || '~'
+  - if resource_element[:elements].present?
+    %ul
+      = partial :resource_element, collection: resource_element[:elements]

@@ -1,13 +1,25 @@
 module Fhir2relations
   module ResourcesRepository
 
-    def resources(db, cnd, &block)
-      ress = _db.query_block(_db.dataset(db, :resources).where(cnd), &block)
-      els = _db.dataset(db, :resource_elements)
-      .where(resource:  _db.pluck(ress, :type)).all
+    def _resources(db)
+      _db.dataset(db, :resources)
+    end
 
-      els = coll_to_tree(els)
-      _db.with_children(ress, :type, :elements, els, :resource)
+    def resources(db, cnd, &block)
+      with_elements = cnd.delete(:with_elements)
+
+      ress = _db.query_block(_resources(db).where(cnd), &block)
+
+      if with_elements
+        els = _db.dataset(db, :resource_elements)
+        .where(resource:  _db.pluck(ress, :type)).all
+        .reject{|e| e[:path].last == 'extension'}
+
+        els = coll_to_tree(els)
+        _db.with_children(ress, :type, :elements, els, :resource)
+      else
+        ress
+      end
     end
 
     def coll_to_tree(coll)

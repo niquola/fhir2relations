@@ -1,5 +1,6 @@
 require "fhir2relations/version"
 require 'virtus'
+require 'active_support/core_ext'
 
 module Fhir2relations
   autoload :Loader, 'fhir2relations/loader'
