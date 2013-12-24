@@ -1,0 +1,21 @@
+body {
+}
+
+.resources li {
+  display: inline-block;
+  margin: 0; border-bottom: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  padding: 5px 10px;
+  list-style-type: none;
+}
+ul.elements {
+  margin: 0;
+  padding: 0
+}
+.elements li {
+  margin: 0;
+  border-bottom: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  padding: 5px 10px;
+  list-style-type: none;
+}
