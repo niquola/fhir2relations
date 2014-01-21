@@ -1,5 +1,4 @@
---db:test
---db:medapp_dev
+--db:fhirr
 --{{{
 select datatype, array_agg(name)
 from meta.datatype_elements
@@ -53,13 +52,7 @@ order by path
 --}}}
 
 --{{{
-select path, type from meta.elements
+select path, type from meta.resource_elements
 where array_length(type, 1) > 1
 order by path
---}}}
-
---{{{
-select * from meta.elements
-where array_length(path, 1) = 1
-order by resource
 --}}}

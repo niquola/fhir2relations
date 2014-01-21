@@ -3,7 +3,7 @@
 ## Installation
 
   gem 'fhir2relations'
-  sequel -m db/migrations postgres:///fhir2relations
+  sequel -m db/migrations postgres:///fhirr
 
 ## Contributing
 
